@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ challenge.title }}</title>
+  <link rel="icon" href="/static/redlimit-logo.png" />
+  <link rel="stylesheet" href="/static/redlimit.css" />
+</head>
+<body>
+
+  <header class="rl-top">
+    <!-- The real RedLimit lockup. It is the only image on the page, and the
+         only place the brand speaks before the data does. -->
+    <span class="rl-brand">
+      <img src="/static/redlimit-logo.png" alt="RedLimit" width="64" height="30" />
+    </span>
+
+    <div class="rl-heading">
+      <h1>{{ challenge.title }}</h1>
+      <p class="rl-sub">
+        {{ challenge.difficulty | capitalize }},
+        about {{ challenge.estimated_minutes }} minutes
+      </p>
+    </div>
+
+  </header>
+
+  <p class="rl-brief"><span>{{ narrative }}</span></p>
+
+  <main class="rl-main">
+    <section class="rl-panel" aria-label="Event log">
+      <div class="rl-filters">
+        <input type="search" id="q" placeholder="Search the log" aria-label="Search the log" />
+        {% for f in dashboard.filters %}
+        <input type="text" id="{{ f.id }}" placeholder="{{ f.placeholder }}" aria-label="Filter by {{ f.placeholder }}" />
+        {% endfor %}
+        <select id="f-type" aria-label="Filter by event type">
+          <option value="">every event type</option>
+        </select>
+        <input type="text" id="f-from" placeholder="from (UTC)" aria-label="From timestamp" />
+        <input type="text" id="f-to" placeholder="to (UTC)" aria-label="To timestamp" />
+        <button id="clearBtn" class="rl-btn rl-btn-quiet" type="button">Clear</button>
+      </div>
+
+      <div class="rl-tablemeta">
+        <span id="dsmeta"></span>
+        <span id="count"></span>
+      </div>
+
+      <div class="rl-scroll">
+        <table class="rl-events">
+          <thead>
+            <tr>
+              {% for c in dashboard.columns %}
+              <th {% if c.sortable %}class="sortable" data-sort="{{ c.key }}" title="Sort by {{ c.label }}"{% endif %}>{{ c.label }}<span class="dir"></span></th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /* Per-lab configuration: which columns the log has, which filters appear,
+       which event values count as hostile, and where answers are submitted. */
+    window.RL_CONFIG = {{ dashboard | tojson }};
+  </script>
+  <script src="/static/redlimit.js"></script>
+</body>
+</html>

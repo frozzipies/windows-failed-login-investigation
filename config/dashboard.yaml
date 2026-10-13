@@ -1,0 +1,19 @@
+# Shape of this lab's log, read by the shared RedLimit SOC dashboard template.
+# 4625 is a failed logon, so it is the row an analyst is hunting here.
+timeField: timestamp
+defaultSort: timestamp
+hostileField: event_id
+hostileValues: ["4625"]
+searchFields: [target_user, source_ip, computer, status, event_id, record_id]
+filters:
+  - {id: f-username, field: target_user, placeholder: target user}
+  - {id: f-ip, field: source_ip, placeholder: source IP}
+columns:
+  - {key: timestamp, label: "Timestamp (UTC)", sortable: true, cls: mono}
+  - {key: event_id, label: "Event ID", sortable: true, type: event}
+  - {key: target_user, label: "Target User", sortable: true}
+  - {key: source_ip, label: "Source IP", sortable: true, cls: mono}
+  - {key: logon_type, label: "Logon Type", sortable: true, cls: mono}
+  - {key: computer, label: Computer, sortable: true}
+  - {key: status, label: Status, sortable: false, cls: mono}
+  - {key: record_id, label: Record, sortable: true, cls: mono}

@@ -1,0 +1,260 @@
+/* RedLimit SOC dashboard template.
+ *
+ * Palette is taken from the real RedLimit logo, not from a default:
+ *   #202022  the logo's own background      -> page base
+ *   #FFFFFF  the wordmark                   -> primary text
+ *   #FF1012  the block behind "red"         -> the single accent
+ * Neutrals are derived from the base. Nothing else is introduced.
+ *
+ * Accent rule, decided by contrast math, not taste:
+ *   white text on #FF1012 measures 3.94:1, which fails WCAG AA for body text.
+ *   So red is only ever a GRAPHICAL block (4.13:1 on base, 3.63:1 on panel,
+ *   both above the 3:1 non-text minimum). Red is never small text, and text
+ *   is never set inside a red fill.
+ *
+ * Identity motif: the solid rectangle from the wordmark, reused as the state
+ * marker. Red block = a failed or hostile event. White block = a solved task.
+ * One geometry carrying two meanings, so no extra colors are needed.
+ *
+ * Dials: ENERGY 2 / RHYTHM 2 / MOTION 1.
+ */
+
+:root {
+  --rl-base: #202022;
+  --rl-panel: #2a2a2e;
+  --rl-sunken: #1a1a1c;
+  --rl-line: #3c3c42;
+  --rl-text: #ffffff;
+  --rl-muted: #9a9aa0;
+  --rl-red: #ff1012;
+
+  /* two radii only: 0 echoes the wordmark's hard rectangle, 4px softens
+     the containers it sits on. No pill shapes anywhere. */
+  --rl-r: 4px;
+
+  /* system stack on purpose: these labs run offline inside Docker, so a
+     webfont from a CDN would simply fail to load. Brand presence comes from
+     the logo and the accent, not from a typeface download. */
+  --rl-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* mono for timestamps, IPs and refs: they are scanned down the column, so
+     they need fixed advance width to line up. */
+  --rl-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --rl-gap: 20px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--rl-base);
+  color: var(--rl-text);
+  font-family: var(--rl-sans);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Keyboard access is a requirement, not a nicety. The outline is never
+   removed, only replaced with a higher-contrast one. */
+:focus-visible {
+  outline: 2px solid var(--rl-text);
+  outline-offset: 2px;
+}
+
+a { color: var(--rl-text); }
+
+/* ---------------------------------------------------------------- header -- */
+
+.rl-top {
+  display: flex;
+  align-items: center;
+  gap: var(--rl-gap);
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  background: var(--rl-base);
+  border-bottom: 1px solid var(--rl-line);
+}
+
+.rl-brand {
+  display: block;
+  flex: none;
+  line-height: 0;
+}
+/* the asset is 307x145 at 5x density, so it stays sharp at this size */
+.rl-brand img { height: 30px; width: auto; display: block; }
+
+.rl-heading { flex: 1 1 260px; min-width: 0; }
+
+.rl-heading h1 {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.rl-sub {
+  margin: 2px 0 0;
+  color: var(--rl-muted);
+  font-size: 0.8125rem;
+}
+
+
+/* ------------------------------------------------------------- narrative -- */
+
+.rl-brief {
+  margin: 0;
+  padding: 14px 20px;
+  background: var(--rl-sunken);
+  border-bottom: 1px solid var(--rl-line);
+  color: var(--rl-muted);
+}
+/* the band runs the full width; the line length is capped on the text itself,
+   because a measure past ~90 characters is hard to track back to the next line */
+.rl-brief > span { display: block; max-width: 90ch; }
+
+/* ---------------------------------------------------------------- layout -- */
+
+/* Built around the one thing an analyst does here: read the evidence, then
+   answer. The evidence table is the focal point and takes the free column;
+   the task rail is fixed and secondary. This is deliberately not the
+   sidebar + stat-row + chart dashboard shell, because nothing on this screen
+   is a metric. */
+.rl-main {
+  padding: var(--rl-gap);
+}
+
+.rl-panel {
+  background: var(--rl-panel);
+  border: 1px solid var(--rl-line);
+  border-radius: var(--rl-r);
+  padding: 14px;
+  min-width: 0;
+}
+
+.rl-panel > h2 {
+  margin: 0 0 12px;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--rl-muted);
+}
+
+/* --------------------------------------------------------------- filters -- */
+
+.rl-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.rl-filters input,
+.rl-filters select {
+  background: var(--rl-sunken);
+  border: 1px solid var(--rl-line);
+  color: var(--rl-text);
+  padding: 8px 10px;
+  border-radius: var(--rl-r);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  min-width: 0;
+  min-height: 38px;
+}
+.rl-filters input::placeholder { color: var(--rl-muted); }
+.rl-filters input:focus-visible,
+.rl-filters select:focus-visible { border-color: var(--rl-text); }
+
+#q { flex: 1 1 240px; }
+.rl-filters input[type="text"] { flex: 1 1 130px; }
+
+.rl-tablemeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--rl-muted);
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+}
+
+/* ----------------------------------------------------------------- table -- */
+
+.rl-scroll {
+  overflow: auto;
+  max-height: 68vh;
+  border: 1px solid var(--rl-line);
+  border-radius: var(--rl-r);
+}
+
+table.rl-events {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+table.rl-events thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--rl-sunken);
+  text-align: left;
+  font-weight: 650;
+  font-size: 0.75rem;
+  color: var(--rl-muted);
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--rl-line);
+  white-space: nowrap;
+}
+
+table.rl-events th.sortable { cursor: pointer; user-select: none; }
+table.rl-events th.sortable:hover { color: var(--rl-text); }
+/* sort direction is spelled out, never carried by a bare glyph alone */
+table.rl-events th .dir { font-weight: 400; }
+
+table.rl-events tbody td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--rl-line);
+  vertical-align: top;
+}
+table.rl-events tbody tr:last-child td { border-bottom: 0; }
+table.rl-events tbody tr:hover td { background: var(--rl-sunken); }
+
+td.mono, .mono { font-family: var(--rl-mono); white-space: nowrap; font-size: 0.78125rem; }
+td.msg { color: var(--rl-muted); font-family: var(--rl-mono); font-size: 0.78125rem; }
+
+/* The motif. A solid rectangle lifted straight from the wordmark, used as a
+   graphical severity marker so the label text stays white and readable.
+   Red marks an event the analyst is hunting (a failure or a hostile login);
+   the hollow variant marks everything else. */
+.rl-mark {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex: none;
+  margin-right: 7px;
+  vertical-align: baseline;
+  border-radius: 0;
+  background: transparent;
+  border: 1px solid var(--rl-muted);
+}
+.rl-mark.is-hostile { background: var(--rl-red); border-color: var(--rl-red); }
+
+.rl-event { white-space: nowrap; }
+
+/* ---------------------------------------------------------------- states -- */
+
+/* R-27: each state names what happened and what to do next. None of them say
+   "No data available". */
+.rl-state {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--rl-muted);
+  font-size: 0.8125rem;
+}
+.rl-state b { display: block; color: var(--rl-text); font-weight: 650; margin-bottom: 4px; }
+.rl-state .rl-btn { margin-top: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
